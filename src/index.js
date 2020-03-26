@@ -7,10 +7,6 @@ import _ from 'lodash'
 
 //puppeteer
 
-let stooqUrl = 'https://stooq.pl/t/?i=59&v=0'
-
-let bitbayUrl = 'https://bitbay.net/pl/kurs-walut'
-
 let update_pairs = {};
 
 (async function main() {
@@ -18,7 +14,7 @@ let update_pairs = {};
     const browser = await puppeteer.launch({ headless: true });
     const [page] = await browser.pages();
 
-    await page.goto(stooqUrl);
+    await page.goto("https://stooq.pl/t/?i=59&v=0");
     await page.exposeFunction('puppeteerMutationListener', puppeteerMutationListener);
     await page.exposeFunction('logMe', logMe)
     await page.evaluate(() => {
@@ -30,14 +26,18 @@ let update_pairs = {};
           target.textContent,
         )
       const observer = new MutationObserver((mutationsList) => {
-        mutationsList.forEach((mutation)=> {
-          window.puppeteerMutationListener(
-            mutation.target.id.substr(3, 6).toUpperCase(),
-            mutation.addedNodes[0].textContent,
-          );
+        mutationsList.forEach((mutation) => {
+          if (mutation.target.id.substr(3, 6) !== 'plnbtc') {
+            window.puppeteerMutationListener(
+              mutation.target.id.substr(3, 6).toUpperCase(),
+              mutation.addedNodes[0].textContent,
+            );
+          }
         })
       });
-      observer.observe(target,{ childList: true });
+        observer.observe(target, { childList: true });
+        
+        setTimeout(() => location.reload(true), 5000)
       })
 
     });
@@ -52,27 +52,36 @@ let update_pairs = {};
     const browser = await puppeteer.launch({ headless: true });
     const [page] = await browser.pages();
     
-    await page.goto(bitbayUrl);
+    await page.goto("https://e-kursy-walut.pl/");
     await page.exposeFunction('puppeteerMutationListener', puppeteerMutationListener);
+    //await page.exposeFunction('logMe', logMe);
 
+    await page.waitFor(2000);
     await page.evaluate(() => {
-      const plneth = document.querySelector('.ETH-PLN .currency-table__price.number-format');
-      const plnltc = document.querySelector('.LTC-PLN .currency-table__price.number-format');
-      const plnxrp = document.querySelector('.XRP-PLN .currency-table__price.number-format');
-      const plnbcc = document.querySelector('.BCC-PLN .currency-table__price.number-format');
+      //document.querySelector('td[title=Bitcoin]').parentNode.querySelector('.price strong').innerHTML
+      const plnbtc = document.querySelector('td[title=Bitcoin]').parentNode.querySelector('.price strong')
+      const plneth = document.querySelector('td[title=Ethereum]').parentNode.querySelector('.price strong')
+      //logMe(plneth.textContent.match(/([0-9.]+)/g))
+      const plnltc = document.querySelector('td[title=Litecoin]').parentNode.querySelector('.price strong')
+      const plnxrp = document.querySelector('td[title=Ripple]').parentNode.querySelector('.price strong')
+      const plnbcc = document.querySelector('td[title="Bitcoin Cash"]').parentNode.querySelector('.price strong')
 
-      puppeteerMutationListener("PLNETH", 1 / parseFloat(plneth.textContent))
-      puppeteerMutationListener("PLNLTC", 1 / parseFloat(plnltc.textContent))
-      puppeteerMutationListener("PLNXRP", 1 / parseFloat(plnxrp.textContent))
-      puppeteerMutationListener("PLNBCC", 1 / parseFloat(plnbcc.textContent))
+      puppeteerMutationListener("PLNBTC", 1 / parseFloat(plnbtc.textContent.match(/([0-9.]+)/g)[0]))
+      puppeteerMutationListener("PLNETH", 1 / parseFloat(plneth.textContent.match(/([0-9.]+)/g)[0]))
+      puppeteerMutationListener("PLNLTC", 1 / parseFloat(plnltc.textContent.match(/([0-9.]+)/g)[0]))
+      puppeteerMutationListener("PLNXRP", 1 / parseFloat(plnxrp.textContent.match(/([0-9.]+)/g)[0]))
+      puppeteerMutationListener("PLNBCC", 1 / parseFloat(plnbcc.textContent.match(/([0-9.]+)/g)[0]))
       
       const observer = new MutationObserver(mutationsList => mutationsList.forEach(mutation => {
-        window.puppeteerMutationListener("PLNETH", 1 / parseFloat(plneth.textContent))
-        window.puppeteerMutationListener("PLNLTC", 1 / parseFloat(plnltc.textContent))
-        window.puppeteerMutationListener("PLNXRP", 1 / parseFloat(plnxrp.textContent))
-        window.puppeteerMutationListener("PLNBCC", 1 / parseFloat(plnbcc.textContent))
+        window.puppeteerMutationListener("PLNBTC", 1 / parseFloat(plnbtc.textContent.match(/([0-9.]+)/g)[0]))
+        window.puppeteerMutationListener("PLNETH", 1 / parseFloat(plneth.textContent.match(/([0-9.]+)/g)[0]))
+        window.puppeteerMutationListener("PLNLTC", 1 / parseFloat(plnltc.textContent.match(/([0-9.]+)/g)[0]))
+        window.puppeteerMutationListener("PLNXRP", 1 / parseFloat(plnxrp.textContent.match(/([0-9.]+)/g)[0]))
+        window.puppeteerMutationListener("PLNBCC", 1 / parseFloat(plnbcc.textContent.match(/([0-9.]+)/g)[0]))
         }))
       observer.observe(plneth, { childList: true });
+
+      setTimeout(() => location.reload(true), 5000)
       
     })
 
@@ -93,12 +102,14 @@ let update_pairs = {};
     await page.evaluate(() => {
       const plnaed = document.querySelector('.rate-value')
 
-      puppeteerMutationListener("PLNAED", plnaed.textContent.replace(/,/g,'.'))
+      puppeteerMutationListener("PLNAED", plnaed.textContent.replace(/,/g,'.').match(/([0-9.]+)/g)[0])
       
       const observer = new MutationObserver(mutationsList => mutationsList.forEach(mutation => {
-        window.puppeteerMutationListener("PLNAED", plnaed.textContent.replace(/,/g,'.'))
+        window.puppeteerMutationListener("PLNAED", plnaed.textContent.replace(/,/g,'.').match(/([0-9.]+)/g)[0])
         }))
       observer.observe(plnaed, { childList: true });
+
+      setTimeout(() => location.reload(true), 5000)
       
     })
 
@@ -112,6 +123,12 @@ function logMe(id) {
 }
 
 function puppeteerMutationListener(id, newv) {
+
+  let new_value = newv;
+  if (id === 'PLNBTC') {
+    new_value = 1 / parseFloat(newv);
+  }
+
   if (update_pairs.id) {
     update_pairs.id = newv
   } else { 
@@ -139,7 +156,7 @@ app.get("/", (req, res) => {
 
 app.get("/mainpairs.json", (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify(update_pairs));
+  res.send(JSON.stringify({ "timestamp": new Date().getTime(), ...update_pairs }));
 });
 
 

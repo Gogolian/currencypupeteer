@@ -1,7 +1,6 @@
 {
   "name": "currencypupeteer",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "nodemon --exec babel-node src/index.js",
@@ -23,5 +22,14 @@
     "lodash": "^4.17.15",
     "puppeteer": "^2.1.1",
     "request": "^2.88.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gogolian/currencypupeteer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Gogolian/currencypupeteer/issues"
+  },
+  "homepage": "https://github.com/Gogolian/currencypupeteer#readme",
+  "description": ""
 }
